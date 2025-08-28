@@ -14,7 +14,7 @@ param(
 # The script authenticates using an Entra App Registration and queries the Azure Management API.
 #
 # Author: [Mario Cuomo]
-# Date: [12th August, 2025]
+# Date: [28th August, 2025]
 # =============================================
 
 
