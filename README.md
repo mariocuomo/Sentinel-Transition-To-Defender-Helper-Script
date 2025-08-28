@@ -1,5 +1,5 @@
 # Sentinel Transition To Defender Helper Script
-This repository contains an [helper script](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v2.0.ps1) that I developed to assist Sentinel customer to adopt Sentinel in Defender. 
+This repository contains an [helper script](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v2.0.ps1) that I developed to assist Sentinel customer to adopt Sentinel in Defender. Read also [here](https://www.linkedin.com/pulse/quick-automatic-checker-reducing-friction-during-sentinel-mario-cuomo-ab6ge/?trackingId=SYO7SFxKS9uLNXsgJ7iU6Q%3D%3D)
 
 ## Overview
 
