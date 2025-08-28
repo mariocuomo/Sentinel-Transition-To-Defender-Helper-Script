@@ -25,7 +25,7 @@ The Defender portal uses a unique engine to correlate incidents and alerts. When
 To help make the transition as smooth as possible, I developed the **_Sentinel Transition To Defender Helper_** PowerShell script. It analyses the integration of Defender XDR data into Sentinel, the Analytics Rules, and the Automation Rules defined in Sentinel for compatibility with the Defender platform. The script calls the _Microsoft.SecurityInsights APIs_ to retrieve data of interest. The APIs are executed with **Application Context**, where the registered app has the **Sentinel Reader** role for the Log Analytics Workspace.
 
 <div align="center">
-<img src="https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/diagram.png" width="600">
+<img src="https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/resources/diagram.png" width="600">
 </div>
 
 The script outputs the findings. <br>
