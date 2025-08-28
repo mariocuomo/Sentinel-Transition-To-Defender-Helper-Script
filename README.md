@@ -29,7 +29,7 @@ To help make the transition as smooth as possible, I developed the **_Sentinel T
 </div>
 
 The script outputs the findings. <br>
-The findings are printed to the [shell](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/output.png) or exported to a [PDF file](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/Report.pdf).
+The findings are printed to the [shell](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/output.png) or exported to a [PDF file](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/report.pdf).
 
 ``` powershell
 .\SentinelTransitionHelper.ps1 -FileName "Report"
