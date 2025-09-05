@@ -1,6 +1,8 @@
 # Version history
 
-- [SentinelTransitionHelper_v2.1.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v2.1.ps1) **CURRENT** <br> Minor updates: fixed some printing operations, code refactoring per better management
+- [SentinelTransitionHelper_v3.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v3.0) **CURRENT** <br> Implemented the possibility to analyze multiple Sentinel environments in a single script execution. Metadata (workspaceName, resourceGroupName, subscriptionId) for the various Sentinel environments should be inserted into the [_sentinelEnvironments.json_](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v3.0/sentinelEnvironments.json) file.
+  
+- [SentinelTransitionHelper_v2.1.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v2.1.ps1) <br> Minor updates: fixed some printing operations, code refactoring per better management
 
 - [SentinelTransitionHelper_v2.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v2.0.ps1) <br> Implemented the option to create PDF reports using _FileName_ parameter. Added statistics on passed and failed controls.
 
