@@ -32,7 +32,7 @@ The script outputs the findings. <br>
 The findings are printed to the [shell](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/resources/output.png) or exported to a [PDF file](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/resources/report.pdf).
 
 ``` powershell
-.\SentinelTransitionHelper.ps1 -FileName "Report"
+.\SentinelTransitionHelper.ps1 -FileName "Report.pdf -EnviromentsFile ".\sentinelEnvironments.json"
 ```
 
 
