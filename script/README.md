@@ -1,4 +1,4 @@
-# Version history
+## Version history
 
 - [SentinelTransitionHelper_v3.2.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v3.2.ps1) **CURRENT** <br> Added the _Format_ parameter (docx or pdf)
 
@@ -11,3 +11,12 @@
 - [SentinelTransitionHelper_v2.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v2.0.ps1) <br> Implemented the option to create PDF reports using _FileName_ parameter. Added statistics on passed and failed controls.
 
 - [SentinelTransitionHelper_v1.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v2.1.ps1) <br> Initial version, blog post [here](https://www.linkedin.com/pulse/quick-automatic-checker-reducing-friction-during-sentinel-mario-cuomo-ab6ge/?trackingId=YW5akA14RT6hF4YknmrZFw%3D%3D). Same version as [gist](https://gist.github.com/mariocuomo/9594cffd32b87289ae70bff29da86618)
+
+---
+## Backlog of controls to be implemented
+- Custom Details Override Analysis sometimes is not populated correctly
+- Insert an intro describing the _Appendix - Analytics Rules or Scheduled Rules Analysis_ section
+- Be sure that Word and Excel processes are closed correctly
+- Handling errors
+- Implementing more logic about custom detections conversio with dedicated functions to check tables mentioned the KQL queries
+- Refactoring code to be more performant and more readable 
