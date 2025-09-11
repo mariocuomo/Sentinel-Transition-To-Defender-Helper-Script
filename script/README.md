@@ -1,6 +1,8 @@
 ## Version history
 
-- [SentinelTransitionHelper_v3.2.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v3.2.ps1) **CURRENT** <br> Added the _Format_ parameter (docx or pdf)
+- [SentinelTransitionHelper_v4.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.0.ps1) **CURRENT** <br> Implemented the ability to analyse the current configuration of Sentinel Analytics Rules to understand whether they can be migrated to Custom Detection Rules (based on the GA features of September 11, 2025)
+
+- [SentinelTransitionHelper_v3.2.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v3.2.ps1) <br> Added the _Format_ parameter (docx or pdf)
 
 - [SentinelTransitionHelper_v3.1.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v3.1.ps1) <br> Fixed printing issues. 
 
