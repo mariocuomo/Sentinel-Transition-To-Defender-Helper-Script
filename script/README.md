@@ -1,6 +1,8 @@
 ## Version history
 
-- [SentinelTransitionHelper_v4.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.0.ps1) **CURRENT** <br> Implemented the ability to analyse the current configuration of Sentinel Analytics Rules to understand whether they can be migrated to Custom Detection Rules (based on the GA features of September 11, 2025)
+- [SentinelTransitionHelper_v4.1.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.0.ps1) **CURRENT** <br> Code Refactoring
+
+- [SentinelTransitionHelper_v4.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.0.ps1) <br> Implemented the ability to analyse the current configuration of Sentinel Analytics Rules to understand whether they can be migrated to Custom Detection Rules (based on the GA features of September 11, 2025)
 
 - [SentinelTransitionHelper_v3.2.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v3.2.ps1) <br> Added the _Format_ parameter (docx or pdf)
 
@@ -16,9 +18,6 @@
 
 ---
 ## Backlog of controls to be implemented
-- Custom Details Override Analysis sometimes is not populated correctly
-- Insert an intro describing the _Appendix - Analytics Rules or Scheduled Rules Analysis_ section
 - Be sure that Word and Excel processes are closed correctly
 - Handling errors
-- Implementing more logic about custom detections conversio with dedicated functions to check tables mentioned the KQL queries
-- Refactoring code to be more performant and more readable 
+- Implementing more logic about custom detections conversion with dedicated functions to check tables mentioned the KQL queries
