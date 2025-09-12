@@ -21,3 +21,4 @@
 - Be sure that Word and Excel processes are closed correctly
 - Handling errors
 - Implementing more logic about custom detections conversion with dedicated functions to check tables mentioned the KQL queries
+- Entra RBAC and Defender RBAC Analysis
