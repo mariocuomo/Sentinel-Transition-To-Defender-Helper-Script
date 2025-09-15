@@ -1,5 +1,5 @@
 # Sentinel Transition To Defender Helper Script
-This repository contains an [helper script](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v4.1.ps1) that I developed to assist Sentinel customer to adopt Sentinel in Defender. Read also [here](https://www.linkedin.com/pulse/quick-automatic-checker-reducing-friction-during-sentinel-mario-cuomo-ab6ge/?trackingId=SYO7SFxKS9uLNXsgJ7iU6Q%3D%3D).
+This repository contains an [helper script](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v4.2.ps1) that I developed to assist Sentinel customer to adopt Sentinel in Defender. Read also [here](https://www.linkedin.com/pulse/quick-automatic-checker-reducing-friction-during-sentinel-mario-cuomo-ab6ge/?trackingId=SYO7SFxKS9uLNXsgJ7iU6Q%3D%3D).
 
 ## Overview
 
@@ -32,7 +32,7 @@ The script outputs the findings. <br>
 The findings are printed to the [shell](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/resources/output.png) or exported to a [PDF/WORD file](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/resources/report.pdf).
 
 ``` powershell
-.\SentinelTransitionHelper.ps1 -FileName "Report.pdf -EnviromentsFile ".\sentinelEnvironments.json" -Format "docx"
+.\SentinelTransitionHelper.ps1 -FileName "Report.pdf" -EnvironmentsFile ".\sentinelEnvironments.json" -Format "docx"
 ```
 
 
