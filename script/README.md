@@ -1,10 +1,12 @@
 ## Version history
 
-- [SentinelTransitionHelper_v4.2.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.2.ps1) **CURRENT** <br> Note about Analytics Rules vs Custom Detection Rules
+- [SentinelTransitionHelper_v4.3.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.3.ps1) **CURRENT** <br> Automation rules with Fusion Engine as trigger condition are now highlighed as warning
+
+- [SentinelTransitionHelper_v4.2.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.2.ps1) <br> Note about Analytics rules vs custom detection rules
 
 - [SentinelTransitionHelper_v4.1.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.1.ps1) <br> Code Refactoring
 
-- [SentinelTransitionHelper_v4.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.0.ps1) <br> Implemented the ability to analyse the current configuration of Sentinel Analytics Rules to understand whether they can be migrated to Custom Detection Rules (based on the GA features of September 11, 2025)
+- [SentinelTransitionHelper_v4.0.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v4.0.ps1) <br> Implemented the ability to analyse the current configuration of Sentinel analytics rules to understand whether they can be migrated to custom detection rules (based on the GA features of September 11, 2025)
 
 - [SentinelTransitionHelper_v3.2.ps1](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/script/SentinelTransitionHelper_v3.2.ps1) <br> Added the _Format_ parameter (docx or pdf)
 
