@@ -57,7 +57,7 @@ Edit `sentinelEnvironments.json` with the Sentinel workspaces to analyse:
 
 ### 3. View the dashboard
 
-Open `dashboard.html` in your browser and load the generated `results.csv`.
+Open `dashboard.html` or visit this [website](https://mariocuomo.github.io/view/SentinelInDefender/dashboard.html) in your browser and load the generated `results.csv`.
 
 ## 🔐 Authentication
 
