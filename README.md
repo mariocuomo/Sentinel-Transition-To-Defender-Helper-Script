@@ -1,3 +1,13 @@
+> [!IMPORTANT]
+> ## 🚀 New Version Available
+> A completely rewritten version of this tool is now available with an **interactive HTML dashboard**, **multi-workspace support**, **User and App authentication modes**, and much more.
+>
+> **👉 [Defender Adoption Helper (v2)](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/tree/main/NEW%20VERSION)**
+>
+> The new version no longer requires an App Registration for interactive use — just sign in with your browser.
+
+---
+
 # Sentinel Transition To Defender Helper Script
 This repository contains an [helper script](https://github.com/mariocuomo/Sentinel-Transition-To-Defender-Helper-Script/blob/main/script/SentinelTransitionHelper_v4.3.ps1) that I developed to assist Sentinel customer to adopt Sentinel in Defender. Read also [here](https://www.linkedin.com/pulse/quick-automatic-checker-reducing-friction-during-sentinel-mario-cuomo-ab6ge/?trackingId=SYO7SFxKS9uLNXsgJ7iU6Q%3D%3D).
 
@@ -34,8 +44,3 @@ The findings are printed to the [shell](https://github.com/mariocuomo/Sentinel-T
 ``` powershell
 .\SentinelTransitionHelper.ps1 -FileName "Report.pdf" -EnvironmentsFile ".\sentinelEnvironments.json" -Format "docx"
 ```
-
-
-
-
-
