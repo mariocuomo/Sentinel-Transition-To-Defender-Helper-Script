@@ -28,7 +28,8 @@ body{font-family:'Inter','Segoe UI',sans-serif;color:var(--text);line-height:1.5
 
 /* ===== SIDEBAR ===== */
 .sidebar{width:260px;background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:60;transition:transform .3s}
-.sidebar-brand{padding:20px 24px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-brand{padding:20px 24px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;transition:background .2s}
+.sidebar-brand:hover{background:var(--sidebar-hover)}
 .sidebar-brand-icon{width:36px;height:36px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2em;color:#fff;flex-shrink:0}
 .sidebar-brand-text{font-weight:700;font-size:.92em;color:#fff;line-height:1.3}
 .sidebar-brand-text span{display:block;font-weight:400;font-size:.78em;color:var(--sidebar-text);margin-top:1px}
@@ -468,6 +469,12 @@ function _esc(s){var d=document.createElement('div');d.textContent=s;return d.in
   // Mobile menu
   menuToggle.addEventListener('click',function(){sidebar.classList.toggle('open')});
 
+  // Brand click = go to General
+  document.querySelector('.sidebar-brand').addEventListener('click',function(){
+    var genBtn=sidebarNav.querySelector('.nav-item[data-panel="p-General"]');
+    if(genBtn)activateNav(genBtn);
+  });
+
   // Drag & drop on upload card
   var homeUploadCard=document.getElementById('homeUploadCard');
   homeUploadCard.addEventListener('click',function(){document.getElementById('fileInput').click()});
@@ -479,7 +486,23 @@ function _esc(s){var d=document.createElement('div');d.textContent=s;return d.in
   // Help overlay
   document.getElementById('homeHelpCard').addEventListener('click',function(){document.getElementById('helpOverlay').classList.add('open')});
   document.getElementById('helpClose').addEventListener('click',function(){document.getElementById('helpOverlay').classList.remove('open')});
-  document.getElementById('helpOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});;
+  document.getElementById('helpOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+
+  // Permanent nav items (always visible)
+  var dataLoaded=false;
+  function buildPermanentNav(){
+    addNav('General','&#x1F4CA;',true);
+    addPanel('General','');  // placeholder, content set on CSV load
+    addSidebarSection('Knowledge');
+    addNav('Recommendations','&#x1F4D6;',false);
+    addNav('Multi-Tenant','&#x1F510;',false);
+  }
+  function buildKnowledgePanels(){
+    addPanel('Recommendations',buildRecommendations());
+    addPanel('Multi-Tenant',buildMultiTenant());
+  }
+  buildPermanentNav();
+  buildKnowledgePanels();;
 
   function loadFile(f){var r=new FileReader();r.onload=function(e){render(e.target.result)};r.readAsText(f)}
 
@@ -504,6 +527,8 @@ function _esc(s){var d=document.createElement('div');d.textContent=s;return d.in
 
     sidebarNav.innerHTML='';panels.innerHTML='';
 
+    dataLoaded=true;
+
     // General nav + panel
     addNav('General','&#x1F4CA;',true);
     addPanel('General',buildGeneral(envs,scores));
@@ -525,6 +550,8 @@ function _esc(s){var d=document.createElement('div');d.textContent=s;return d.in
     addSidebarSection('Knowledge');
     addNav('Recommendations','&#x1F4D6;',false);
     addPanel('Recommendations',buildRecommendations());
+    addNav('Multi-Tenant','&#x1F510;',false);
+    addPanel('Multi-Tenant',buildMultiTenant());
 
     uploadWrap.style.display='none';
     content.style.display='block';
@@ -562,10 +589,24 @@ function _esc(s){var d=document.createElement('div');d.textContent=s;return d.in
     sidebarNav.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active')});
     document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
     btn.classList.add('active');
-    var panel=document.getElementById(btn.getAttribute('data-panel'));
-    if(panel){panel.classList.add('active')}
+    var panelId=btn.getAttribute('data-panel');
+    // General without data = show upload
+    if(panelId==='p-General'&&!dataLoaded){
+      content.style.display='none';
+      uploadWrap.style.display='';
+      topbarTitle.textContent='Dashboard';
+      sidebar.classList.remove('open');
+      return;
+    }
+    var panel=document.getElementById(panelId);
+    if(panel){
+      panel.classList.add('active');
+      if(content.style.display==='none'){
+        uploadWrap.style.display='none';
+        content.style.display='block';
+      }
+    }
     topbarTitle.textContent=btn.textContent.trim();
-    // Close mobile sidebar
     sidebar.classList.remove('open');
   }
 
@@ -622,11 +663,13 @@ h+='<div class="env-banner" style="display:flex;justify-content:space-between;al
     }
 
     var sectionNames=['Defender Data','Analytics','Automation'];
-    var sectionIcons={'Defender Data':'&#x1F4CA;','Analytics':'&#x1F4CB;','Automation':'&#x1F916;'};
+    var sectionIcons={'Defender Data':'&#x1F4CA;','Analytics':'&#x1F4CB;','Automation':'&#x1F916;','Data Lake Region':'&#x1F30D;','Table Tiers':'&#x1F4E6;'};
     var sectionBlades={
       'Defender Data':'https://portal.azure.com/#blade/Microsoft_OperationsManagementSuite/LogAnalyticsWorkspaceBlade/id/'+encodeURIComponent(wsId)+'/Tables',
       'Analytics':'https://portal.azure.com/#blade/Microsoft_Azure_Security_Insights/MainMenuBlade/Analytics/id/'+encodeURIComponent(wsId),
-      'Automation':'https://portal.azure.com/#blade/Microsoft_Azure_Security_Insights/MainMenuBlade/AutomationRules/id/'+encodeURIComponent(wsId)
+      'Automation':'https://portal.azure.com/#blade/Microsoft_Azure_Security_Insights/MainMenuBlade/AutomationRules/id/'+encodeURIComponent(wsId),
+      'Data Lake Region':'https://portal.azure.com/#blade/Microsoft_OperationsManagementSuite/LogAnalyticsWorkspaceBlade/id/'+encodeURIComponent(wsId)+'/Overview',
+      'Table Tiers':'https://portal.azure.com/#blade/Microsoft_OperationsManagementSuite/LogAnalyticsWorkspaceBlade/id/'+encodeURIComponent(wsId)+'/Tables'
     };
 
     sectionNames.forEach(function(s){
@@ -652,12 +695,14 @@ h+='<div class="env-banner" style="display:flex;justify-content:space-between;al
       var items={};
       sc.forEach(function(c){
         var key=(c.SubItem||'').trim()||('__check_'+sc.indexOf(c));
-        if(!items[key])items[key]={ok:true};
+        if(!items[key])items[key]={ok:true,hasInfo:false};
         if(c.Status==='WARNING')items[key].ok=false;
+        if(c.Status==='INFORMATIONAL')items[key].hasInfo=true;
       });
       var keys=Object.keys(items);
       var totalItems=keys.length;
       var okItems=keys.filter(function(k){return items[k].ok}).length;
+      var infoItems=keys.filter(function(k){return items[k].ok&&items[k].hasInfo}).length;
       var warnItems=totalItems-okItems;
       var pct=totalItems>0?Math.round(okItems/totalItems*100):0;
       var barColor=pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
@@ -666,6 +711,7 @@ h+='<div class="env-banner" style="display:flex;justify-content:space-between;al
       h+='<div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-bottom:4px"><span style="font-size:1.8em;font-weight:900;color:var(--brand)">'+okItems+'</span><span style="font-size:.92em;color:var(--text-tertiary);font-weight:500">/ '+totalItems+'</span></div>';
       h+='<div style="font-size:.78em;color:var(--text-secondary);margin-bottom:10px">items OK';
       if(warnItems>0)h+=' &middot; <span style="color:var(--amber);font-weight:600">'+warnItems+' with warnings</span>';
+      if(infoItems>0)h+=' &middot; <span style="color:var(--blue);font-weight:600">'+infoItems+' informational</span>';
       h+='</div>';
       h+='<div style="background:var(--border-light);border-radius:99px;height:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:99px;transition:width 1s"></div></div>';
       h+='</div>';
@@ -688,6 +734,31 @@ h+='<div class="env-banner" style="display:flex;justify-content:space-between;al
         +'<div class="lgnd-item"><span class="lgnd-dot" style="background:var(--red)"></span>Not Passed ('+fnp+')</div></div></div></div>';
       h+='</div>';
     }
+
+    // ---- Data Lake Readiness (not scored) ----
+    var dlSections=['Data Lake Region','Table Tiers'];
+    var hasDL=dlSections.some(function(s){return checks.filter(function(c){return c.Section===s}).length>0});
+    if(hasDL){
+      h+='<div style="display:flex;align-items:center;gap:16px;margin:36px 0 20px"><div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),var(--brand-50),var(--border),transparent)"></div><span style="font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--brand);white-space:nowrap;padding:6px 16px;background:var(--brand-light);border-radius:99px;border:1px solid var(--brand-50)">Data Lake</span><div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),var(--brand-50),var(--border),transparent)"></div></div>';
+      h+=sec('Data Lake Readiness');
+      h+='<p style="color:var(--text-secondary);margin-bottom:16px;font-size:.84em">These checks assess readiness for Data Lake enablement. They do <strong>not</strong> contribute to the final score.</p>';
+      dlSections.forEach(function(s){
+        var sc=checks.filter(function(c){return c.Section===s});
+        if(sc.length===0)return;
+        var ss=scores.find(function(x){return x.Section===s});
+        var bladeUrl=sectionBlades[s]||sentinelUrl;
+        h+=secWithLink(s,bladeUrl);
+        if(ss){
+          var p=parseFloat(ss.Percent),bc=p>=75?'bar-g':p>=50?'bar-y':'bar-r';
+          h+='<div class="score-box" style="border-left:3px solid var(--brand)"><div class="score-lbl">'+esc(s)+'</div><div class="score-num">'+ss.Passed+' <span style="color:var(--text-tertiary);font-weight:400">/</span> '+ss.Total+' <span style="font-size:.5em;color:var(--text-tertiary);margin-left:6px">('+p+'%)</span></div>'
+            +'<div class="score-bar"><div class="score-fill '+bc+'" style="width:'+p+'%"></div></div></div>';
+        }
+        h+=renderChecksGrouped(sc);
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+
     return h;
   }
 
@@ -792,6 +863,9 @@ h+='<div class="env-banner" style="display:flex;justify-content:space-between;al
 
   function buildRecommendations(){
     var recs=[
+      {icon:'&#x1F30D;',title:'Data Lake Region Support',section:'Data Lake Region',
+       desc:'Not all Azure regions support the Data Lake tier. If your Log Analytics workspace is in a region that does not support Data Lake, you will need to migrate the workspace to a supported region before enabling Data Lake capabilities in Sentinel in Defender.',
+       action:'Verify your workspace region. If not supported, plan a workspace migration to a <a href="https://learn.microsoft.com/en-us/azure/sentinel/geographical-availability-data-residency" target="_blank" rel="noopener">supported region</a> before transitioning.'},
       {icon:'&#x1F4CA;',title:'Defender XDR Table Retention',section:'Defender Data',
        desc:'In the Defender portal, you can correlate Defender XDR logs (30 days default retention) with Sentinel data without ingesting them. If you need data beyond 30 days, you must ingest it into Sentinel. Tables with only 30 days retention don\'t need separate ingestion.',
        action:'Review each Defender table. If retention &gt; 30 days, keep ingesting into Sentinel. If retention = 30 days, no additional ingestion is needed.'},
@@ -807,6 +881,9 @@ h+='<div class="env-banner" style="display:flex;justify-content:space-between;al
       {icon:'&#x1F4E6;',title:'Alert Grouping Controlled by Defender XDR',section:'Analytics',
        desc:'While alert grouping configuration is still visible in Analytics rules, the Defender XDR correlation engine fully controls alert grouping and incident merging. Multiple individual rules configured to generate an incident per alert may result in merged incidents if they match Defender XDR correlation logic.',
        action:'Review rules with custom alert grouping. After onboarding, Defender XDR handles all grouping automatically.'},
+      {icon:'&#x1F4E6;',title:'Table Tier Changes When Transitioning to Defender',section:'Table Tiers',
+       desc:'Sentinel in Defender with Data Lake supports only two tiers: <strong>Analytics</strong> and <strong>Auxiliary</strong>. Tables currently on the <strong>Basic</strong> tier must be converted to Analytics or Auxiliary before transitioning. Tables already on the <strong>Auxiliary</strong> tier will automatically become Data Lake tables.',
+       action:'Review all tables. Convert Basic tier tables to Analytics or Auxiliary. Auxiliary tables will transition as Data Lake tables automatically. See <a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-platform-logs" target="_blank" rel="noopener">Azure Monitor Logs documentation</a> for details.'},
       {icon:'&#x1F3F7;&#xFE0F;',title:'Incident Provider → Alert Product Name',section:'Automation',
        desc:'After onboarding, all incidents have Microsoft XDR as the incident provider (ProviderName). The Incident Provider condition in automation rules becomes unreliable because it\'s always "Microsoft XDR". Use Alert Product Name to distinguish sources.',
        action:'Change automation rule triggers from <em>Incident Provider</em> to <em>Alert Product Name</em>.'},
@@ -826,6 +903,131 @@ h+='<div class="env-banner" style="display:flex;justify-content:space-between;al
       h+='<div style="font-size:.84em;padding:10px 14px;background:var(--green-bg);border:1px solid var(--green-border);border-left:3px solid var(--green);border-radius:var(--r);color:var(--text)"><strong style="color:var(--green)">&#x2192; Action:</strong> '+r.action+'</div>';
       h+='</div>';
     });
+    return h;
+  }
+
+  function buildMultiTenant(){
+    var h='';
+    // Intro
+    h+='<p style="color:var(--text-secondary);margin-bottom:20px;line-height:1.7">When you move Microsoft Sentinel into the Defender portal, multi-tenant management shifts from an <strong>Azure-centric model</strong> (Azure Lighthouse + workspace switching) to a <strong>Defender-centric model</strong> (Unified multi-tenant portal + GDAP/B2B). This section provides guidance on access models, known limitations, and recommended architecture.</p>';
+    h+='<div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px">';
+    h+='<a href="https://learn.microsoft.com/en-us/unified-secops/governance-relationships" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:var(--brand);font-size:.84em;font-weight:600;text-decoration:none;padding:6px 16px;border:1.5px solid var(--brand-50);border-radius:99px;background:var(--brand-light)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Governance &amp; Relationships</a>';
+    h+='<a href="https://learn.microsoft.com/en-us/azure/sentinel/move-to-defender" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:var(--brand);font-size:.84em;font-weight:600;text-decoration:none;padding:6px 16px;border:1.5px solid var(--brand-50);border-radius:99px;background:var(--brand-light)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Move to Defender</a>';
+    h+='</div>';
+
+    // Target Architecture
+    h+='<h3 class="sec-title" onclick="toggleSec(this)"><span class="sec-chevron">&#x25BC;</span>Target Architecture</h3><div class="sec-body">';
+    h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:20px;box-shadow:var(--sh);margin-bottom:12px">';
+    h+='<pre style="font-family:Cascadia Code,Consolas,monospace;font-size:.82em;line-height:1.7;color:var(--text);overflow-x:auto;padding:12px;background:var(--surface-alt);border-radius:var(--r)">';
+    h+='Defender Multi-Tenant Portal (mto.security.microsoft.com)\n';
+    h+='        │\n';
+    h+='        ├── Tenant A (Sentinel workspace onboarded)\n';
+    h+='        ├── Tenant B (Sentinel workspace onboarded)\n';
+    h+='        └── Tenant C (Sentinel workspace onboarded)\n';
+    h+='</pre>';
+    h+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">';
+    h+='<div style="display:flex;align-items:center;gap:6px;font-size:.82em;color:var(--green);font-weight:600">&#x2714; Single SOC view</div>';
+    h+='<div style="display:flex;align-items:center;gap:6px;font-size:.82em;color:var(--green);font-weight:600">&#x2714; Cross-tenant incident investigation</div>';
+    h+='<div style="display:flex;align-items:center;gap:6px;font-size:.82em;color:var(--green);font-weight:600">&#x2714; Cross-tenant hunting</div>';
+    h+='</div></div></div>';
+
+    // The 3 Access Models
+    h+='<h3 class="sec-title collapsed" onclick="toggleSec(this)"><span class="sec-chevron">&#x25BC;</span>The 3 Access Models</h3><div class="sec-body collapsed">';
+    var models=[
+      {icon:'&#x1F30D;',name:'Azure Lighthouse',scope:'Azure resource level (Log Analytics workspace)',
+       enables:['Cross-workspace queries (<code>workspace()</code> in KQL)','Managing Sentinel resources across tenants'],
+       key:'Cross-tenant Sentinel queries <strong>require</strong> Azure Lighthouse. Still mandatory for cross-tenant queries.',status:'required'},
+      {icon:'&#x1F510;',name:'GDAP (Granular Delegated Admin Privileges)',scope:'Entra + Defender RBAC level',
+       enables:['Cross-tenant access to Defender incidents, alerts, devices','Unified access model in Defender portal'],
+       key:'GDAP enables unified delegated access across Sentinel and Defender in the Defender portal. Becoming the future unified model.',status:'required'},
+      {icon:'&#x1F465;',name:'B2B (Guest Users)',scope:'Entra ID guest invitations',
+       enables:['Invite analysts as guest users in each tenant','Works for both Sentinel and Defender'],
+       key:'Not scalable. Hard to manage at MSSP scale. Mostly a fallback / legacy model.',status:'legacy'}
+    ];
+    models.forEach(function(m){
+      var borderColor=m.status==='required'?'var(--green)':m.status==='legacy'?'var(--amber)':'var(--brand)';
+      h+='<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid '+borderColor+';border-radius:var(--rl);padding:18px 20px;margin:10px 0;box-shadow:var(--sh)">';
+      h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:1.3em">'+m.icon+'</span><span style="font-weight:700;font-size:.95em">'+m.name+'</span>';
+      if(m.status==='required')h+='<span style="margin-left:auto;font-size:.7em;background:var(--green-bg);color:var(--green);padding:3px 10px;border-radius:99px;font-weight:700;border:1px solid var(--green-border)">REQUIRED</span>';
+      if(m.status==='legacy')h+='<span style="margin-left:auto;font-size:.7em;background:var(--amber-bg);color:var(--amber);padding:3px 10px;border-radius:99px;font-weight:700;border:1px solid var(--amber-border)">LEGACY</span>';
+      h+='</div>';
+      h+='<div style="font-size:.82em;color:var(--text-tertiary);margin-bottom:8px"><strong>Scope:</strong> '+m.scope+'</div>';
+      h+='<div style="font-size:.84em;color:var(--text-secondary);margin-bottom:8px"><strong>Enables:</strong></div><ul style="font-size:.84em;color:var(--text-secondary);margin:0 0 10px 18px;line-height:1.7">';
+      m.enables.forEach(function(e){h+='<li>'+e+'</li>'});
+      h+='</ul>';
+      h+='<div style="font-size:.84em;padding:8px 12px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r);color:var(--text);line-height:1.6"><strong style="color:var(--blue)">&#x1F511; Key fact:</strong> '+m.key+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+
+    // Best-practice architecture for MSSPs/MTO
+    h+='<h3 class="sec-title collapsed" onclick="toggleSec(this)"><span class="sec-chevron">&#x25BC;</span>Best-Practice Architecture for MSSPs / MTO Customers</h3><div class="sec-body collapsed">';
+    h+='<div style="overflow-x:auto;margin-bottom:16px"><table style="width:100%;border-collapse:collapse;font-size:.84em">';
+    h+='<thead><tr style="background:var(--brand);color:#fff"><th style="padding:10px 14px;text-align:left;font-weight:600">Scenario</th><th style="padding:10px 14px;text-align:left;font-weight:600">Recommended Access Model</th></tr></thead><tbody>';
+    var scenarios=[
+      ['Incidents, alerts, hunting (Defender + primary Sentinel workspace)','<strong>GDAP + MTO</strong> (Defender portal)'],
+      ['Advanced Hunting across tenants','<strong>GDAP</strong>'],
+      ['Workbook authoring, analytics rules, secondary workspaces','<strong>Azure Lighthouse</strong>'],
+      ['Full SOC operations at scale','<strong>Hybrid: GDAP + Lighthouse</strong>']
+    ];
+    scenarios.forEach(function(s,i){
+      var bg=i%2===0?'var(--surface)':'var(--surface-alt)';
+      h+='<tr style="background:'+bg+';border-bottom:1px solid var(--border-light)"><td style="padding:10px 14px">'+s[0]+'</td><td style="padding:10px 14px">'+s[1]+'</td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+
+    // Known Limitations
+    h+='<h3 class="sec-title collapsed" onclick="toggleSec(this)"><span class="sec-chevron">&#x25BC;</span>Known Limitations &amp; Challenges</h3><div class="sec-body collapsed">';
+    var problems=[
+      {icon:'&#x26A0;&#xFE0F;',title:'Split Control Planes',
+       desc:'Sentinel operates at the Azure (ARM / Lighthouse) level while Defender uses the Security portal (GDAP/B2B). You need <strong>both</strong> Lighthouse + GDAP &mdash; no single clean model exists yet.'},
+      {icon:'&#x1F512;',title:'GDAP Does Not Fully Cover Sentinel (Today)',
+       desc:'GDAP works for Defender data, but <strong>Lighthouse is still required</strong> for Sentinel data. You cannot rely only on GDAP for Sentinel cross-tenant queries.'},
+      {icon:'&#x1F5A5;&#xFE0F;',title:'UX Regression vs Azure Portal',
+       desc:'The current Defender portal experience does <strong>not yet replicate</strong> the Azure Sentinel multi-tenant UX. No seamless workspace dropdown, more clicks for navigation, and switching tenants is less intuitive.'},
+      {icon:'&#x1F511;',title:'RBAC Fragmentation',
+       desc:'You now have <strong>three separate RBAC systems</strong>: Entra roles (B2B/GDAP), Azure RBAC (Lighthouse), and Defender Unified RBAC. This creates complex permission mapping and migration pain.'}
+    ];
+    problems.forEach(function(p){
+      h+='<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:var(--rl);padding:16px 18px;margin:10px 0;box-shadow:var(--sh)">';
+      h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:1.2em">'+p.icon+'</span><span style="font-weight:700;font-size:.92em;color:var(--text)">'+p.title+'</span></div>';
+      h+='<p style="font-size:.84em;color:var(--text-secondary);line-height:1.65">'+p.desc+'</p></div>';
+    });
+    h+='</div>';
+
+    // Recommended Architecture (Today)
+    h+='<h3 class="sec-title collapsed" onclick="toggleSec(this)"><span class="sec-chevron">&#x25BC;</span>Recommended Architecture (Today)</h3><div class="sec-body collapsed">';
+    h+='<div style="font-size:.84em;padding:14px 18px;background:var(--green-bg);border:1px solid var(--green-border);border-left:4px solid var(--green);border-radius:var(--rl);margin-bottom:16px;color:var(--text);line-height:1.7">';
+    h+='<strong style="color:var(--green);font-size:1.05em">&#x2714; Use the Hybrid Model</strong><br>';
+    h+='To run Sentinel in Defender across tenants today, you <strong>must combine GDAP</strong> (for Defender access) <strong>+ Azure Lighthouse</strong> (for Sentinel data), while B2B remains optional but legacy.</div>';
+    h+='<div style="overflow-x:auto;margin-bottom:16px"><table style="width:100%;border-collapse:collapse;font-size:.84em">';
+    h+='<thead><tr style="background:var(--brand);color:#fff"><th style="padding:10px 14px;text-align:left;font-weight:600">Layer</th><th style="padding:10px 14px;text-align:left;font-weight:600">Technology</th><th style="padding:10px 14px;text-align:left;font-weight:600">Purpose</th></tr></thead><tbody>';
+    var layers=[
+      ['Identity / Access','GDAP / B2B','Who can access'],
+      ['Resource Access','Azure Lighthouse','Which workspaces / data'],
+      ['SOC Experience','Defender Portal','Where analysts operate']
+    ];
+    layers.forEach(function(l,i){
+      var bg=i%2===0?'var(--surface)':'var(--surface-alt)';
+      h+='<tr style="background:'+bg+';border-bottom:1px solid var(--border-light)"><td style="padding:10px 14px;font-weight:600">'+l[0]+'</td><td style="padding:10px 14px">'+l[1]+'</td><td style="padding:10px 14px">'+l[2]+'</td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+
+    // Where Microsoft is Going
+    h+='<h3 class="sec-title collapsed" onclick="toggleSec(this)"><span class="sec-chevron">&#x25BC;</span>Where Microsoft Is Going</h3><div class="sec-body collapsed">';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px">';
+    h+='<div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--rl);padding:18px 20px">';
+    h+='<div style="font-weight:700;font-size:.88em;color:var(--green);margin-bottom:10px">&#x1F680; Future Direction</div>';
+    h+='<ul style="font-size:.84em;color:var(--text-secondary);margin:0 0 0 16px;line-height:1.8">';
+    h+='<li>Unified delegated access (GDAP extended to Sentinel + Defender)</li>';
+    h+='<li>Single portal (Defender)</li></ul></div>';
+    h+='<div style="background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--rl);padding:18px 20px">';
+    h+='<div style="font-weight:700;font-size:.88em;color:var(--amber);margin-bottom:10px">&#x26A0;&#xFE0F; Today\'s Reality</div>';
+    h+='<ul style="font-size:.84em;color:var(--text-secondary);margin:0 0 0 16px;line-height:1.8">';
+    h+='<li>Lighthouse is still required</li>';
+    h+='<li>Full convergence is not complete</li></ul></div>';
+    h+='</div></div>';
+
     return h;
   }
 

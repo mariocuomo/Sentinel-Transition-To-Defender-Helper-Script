@@ -68,21 +68,68 @@ function Show-HeaderInShell {
 
 # ---- Analysis Functions ----
 
+# Data lake supported regions (Azure internal location names)
+$script:dataLakeSupportedRegions = @(
+    "canadacentral",
+    "centralus", "eastus", "eastus2", "southcentralus", "westus2",
+    "southeastasia",
+    "centralindia",
+    "israelcentral",
+    "japaneast",
+    "northeurope", "westeurope",
+    "francecentral",
+    "italynorth",
+    "switzerlandnorth",
+    "uksouth",
+    "australiaeast"
+)
+
+function Get-DataLakeRegionCheck {
+    $totalControlsTemp = 0; $passedControlsTemp = 0
+    $apiVersion = "2021-12-01-preview"
+    $uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OperationalInsights/workspaces/${workspaceName}?api-version=$apiVersion"
+    $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+    $location = $response.location
+    $totalControlsTemp++
+    if ($script:dataLakeSupportedRegions -contains $location) {
+        Write-Host "[OK]" -ForegroundColor Green -NoNewline; Write-Host " Workspace region '$location' supports Data Lake"
+        $passedControlsTemp++
+        Add-Result -Type 'check' -Environment $workspaceName -Section 'Data Lake Region' -Status 'OK' -Message "Workspace region '$location' supports Data Lake"
+    } else {
+        Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline; Write-Host " Workspace region '$location' does not support Data Lake"
+        Add-Result -Type 'check' -Environment $workspaceName -Section 'Data Lake Region' -Status 'WARNING' -Message "Workspace region '$location' does not support Data Lake. Consider migrating to a supported region"
+    }
+    return $totalControlsTemp, $passedControlsTemp
+}
+
 function Get-AnalysisDefenderData {
     param([Parameter(Mandatory=$true)]$defenderTables)
     $totalControlsTemp = 0; $passedControlsTemp = 0
     $apiVersion = "2025-02-01"
     foreach ($table in $defenderTables) {
         $uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OperationalInsights/workspaces/$workspaceName/tables/${table}?api-version=$apiVersion"
-        $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+        try {
+            $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header -ErrorAction Stop
+        } catch {
+            $errBody = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
+            if ($errBody.error.code -eq "SolutionNotActive") {
+                Write-Host "[INFORMATIONAL]" -ForegroundColor Cyan -NoNewline; Write-Host " The table $table is not active (Sentinel solution not enabled) - skipping"
+                Add-Result -Type 'check' -Environment $workspaceName -Section 'Defender Data' -Status 'INFORMATIONAL' -Message "The table $table is not active - Sentinel solution not enabled on this workspace"
+            } else {
+                Write-Host "[INFORMATIONAL]" -ForegroundColor Cyan -NoNewline; Write-Host " The table $table could not be queried: $($_.Exception.Message)"
+                Add-Result -Type 'check' -Environment $workspaceName -Section 'Defender Data' -Status 'INFORMATIONAL' -Message "The table $table could not be queried: $($_.Exception.Message)"
+            }
+            continue
+        }
         $retentionPeriod = $response.properties.totalRetentionInDays
         $totalControlsTemp++
         if ($response.properties.totalRetentionInDays -lt 31) {
-            Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline; Write-Host " The table $table has a retention of $retentionPeriod days - no need to ingest this data in Sentinel"
-            Add-Result -Type 'check' -Environment $workspaceName -Section 'Defender Data' -Status 'WARNING' -Message "The table $table has a retention of $retentionPeriod days - no need to ingest this data in Sentinel"
-        } else {
-            Write-Host "[OK]" -ForegroundColor Green -NoNewline; Write-Host " The table $table has a retention of $retentionPeriod days - need to be stored in Sentinel for more retention"
+            Write-Host "[INFORMATIONAL]" -ForegroundColor Cyan -NoNewline; Write-Host " The table $table has a retention of $retentionPeriod days - no need to ingest this data in Sentinel"
             $passedControlsTemp++
+            Add-Result -Type 'check' -Environment $workspaceName -Section 'Defender Data' -Status 'INFORMATIONAL' -Message "The table $table has a retention of $retentionPeriod days - no need to ingest this data in Sentinel"
+        } else {
+            $passedControlsTemp++
+            Write-Host "[OK]" -ForegroundColor Green -NoNewline; Write-Host " The table $table has a retention of $retentionPeriod days - need to be stored in Sentinel for more retention"
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Defender Data' -Status 'OK' -Message "The table $table has a retention of $retentionPeriod days - need to be stored in Sentinel for more retention"
         }
     }
@@ -118,47 +165,76 @@ function Get-AnalyticsAnalysis {
         if ($rule.properties.displayName -eq "Advanced Multistage Attack Detection") { continue }
         $ruleName = $rule.properties.displayName
 
-        ## DISABLED RULE (informational only, does not count toward pass/fail)
+        $totalControlsTemp++
+        $ruleHasIssue = $false
+
+        ## DISABLED RULE (informational only, counts as passed)
         if ($rule.properties.enabled -eq $false) {
             Write-Host "[INFORMATIONAL]" -ForegroundColor Cyan -NoNewline; Write-Host " The rule $ruleName is disabled"
+            $passedControlsTemp++
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'INFORMATIONAL' -SubItem $ruleName -Message "Rule is disabled. It will remain disabled after onboarding"
+            continue
         }
 
         ## ALERT VISIBILITY
-        $totalControlsTemp++
         if (!$rule.properties.incidentConfiguration.createIncident) {
             Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline; Write-Host " The rule $ruleName doesn't generate incidents"
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'WARNING' -SubItem $ruleName -Message "Doesn't generate incidents. Alerts aren't visible in the Defender portal - they appear in SecurityAlerts table in Advanced Hunting"
+            $ruleHasIssue = $true
         } else {
-            $passedControlsTemp++
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'OK' -SubItem $ruleName -Message "Alert visibility configured correctly"
         }
 
         ## INCIDENT REOPENING
-        $totalControlsTemp++
         if ($rule.properties.incidentConfiguration.groupingConfiguration.reopenClosedIncident) {
             Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline; Write-Host " The rule $ruleName has incident reopening enabled"
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'WARNING' -SubItem $ruleName -Message "Incident reopening enabled. Not supported in Defender portal - new incidents are created instead"
+            $ruleHasIssue = $true
         } else {
-            $passedControlsTemp++
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'OK' -SubItem $ruleName -Message "No incident reopening"
         }
 
         ## ALERT GROUPING
-        $totalControlsTemp++
         if ($rule.properties.incidentConfiguration.groupingConfiguration.enabled) {
             Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline; Write-Host " The rule $ruleName has alert grouping enabled"
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'WARNING' -SubItem $ruleName -Message "Alert grouping enabled. After onboarding, Defender XDR engine fully controls grouping and merging"
+            $ruleHasIssue = $true
         } else {
-            $passedControlsTemp++
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'OK' -SubItem $ruleName -Message "No custom alert grouping"
         }
 
         ## MICROSOFT INCIDENT CREATION RULES
         if ($rule.kind -eq "MicrosoftSecurityIncidentCreation") {
-            $totalControlsTemp++
             Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline; Write-Host " The rule $ruleName is a Microsoft incident creation rule"
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Analytics' -Status 'WARNING' -SubItem $ruleName -Message "Microsoft incident creation rule - will be deactivated after onboarding"
+            $ruleHasIssue = $true
+        }
+
+        if (-not $ruleHasIssue) { $passedControlsTemp++ }
+    }
+    return $totalControlsTemp, $passedControlsTemp
+}
+
+function Get-TableTiersAnalysis {
+    $totalControlsTemp = 0; $passedControlsTemp = 0
+    $apiVersion = "2022-10-01"
+    $uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OperationalInsights/workspaces/$workspaceName/tables?api-version=$apiVersion"
+    $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+    foreach ($table in $response.value) {
+        $tableName = $table.name
+        $plan = $table.properties.plan
+        $totalControlsTemp++
+        if ($plan -eq "Basic") {
+            Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline; Write-Host " $tableName [$plan] - must be converted to Analytics or Auxiliary tier (Data Lake) when transitioning to Defender"
+            Add-Result -Type 'check' -Environment $workspaceName -Section 'Table Tiers' -Status 'WARNING' -SubItem $tableName -Message "Uses Basic tier. Must be converted to Analytics or Auxiliary tier (Data Lake) when transitioning to Defender"
+        } elseif ($plan -eq "Auxiliary") {
+            Write-Host "[INFORMATIONAL]" -ForegroundColor Cyan -NoNewline; Write-Host " $tableName [$plan] - will become a data lake table when transitioning to Defender"
+            $passedControlsTemp++
+            Add-Result -Type 'check' -Environment $workspaceName -Section 'Table Tiers' -Status 'INFORMATIONAL' -SubItem $tableName -Message "Uses Auxiliary tier. Will become a data lake table when transitioning to Defender"
+        } else {
+            Write-Host "[OK]" -ForegroundColor Green -NoNewline; Write-Host " $tableName [$plan]"
+            $passedControlsTemp++
+            Add-Result -Type 'check' -Environment $workspaceName -Section 'Table Tiers' -Status 'OK' -SubItem $tableName -Message "Uses $plan tier"
         }
     }
     return $totalControlsTemp, $passedControlsTemp
@@ -347,9 +423,15 @@ foreach ($env in $environments) {
         Invoke-RestMethod -Uri $testUri -Headers $header -ErrorAction Stop | Out-Null
     } catch {
         $statusCode = $_.Exception.Response.StatusCode.value__
+        $errBody = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
         if ($statusCode -eq 403 -or $statusCode -eq 401) {
             Write-Host "   [ERROR] No Sentinel Reader access on $workspaceName. Skipping." -ForegroundColor Red
             Add-Result -Type 'check' -Environment $workspaceName -Section 'Access' -Status 'WARNING' -Message "The app does not have Microsoft Sentinel Reader role on this workspace. Assign the role and retry."
+            Add-Result -Type 'score' -Environment $workspaceName -Section 'Final' -Passed 0 -Total 1 -Percent 0
+            $accessOk = $false
+        } elseif ($errBody.error.code -eq "SolutionNotActive" -or ($statusCode -eq 400 -and $errBody.error.message -match "not onboarded to Microsoft Sentinel")) {
+            Write-Host "   [ERROR] Microsoft Sentinel is not installed on $workspaceName. Skipping." -ForegroundColor Red
+            Add-Result -Type 'check' -Environment $workspaceName -Section 'Access' -Status 'WARNING' -Message "Microsoft Sentinel is not installed on this workspace. Enable Sentinel and retry."
             Add-Result -Type 'score' -Environment $workspaceName -Section 'Final' -Passed 0 -Total 1 -Percent 0
             $accessOk = $false
         } else {
@@ -380,6 +462,15 @@ foreach ($env in $environments) {
     $finalPct = if($totalControls -gt 0){[math]::Round(($totalPassedControls/$totalControls)*100,2)}else{100}
     Add-Result -Type 'score' -Environment $workspaceName -Section 'Final' -Passed $totalPassedControls -Total $totalControls -Percent $finalPct
     Write-Host ('Final Score: {0}/{1} ({2}%)' -f $totalPassedControls, $totalControls, $finalPct) -ForegroundColor Cyan
+
+    # ---- data lake Readiness (does not contribute to final score) ----
+    Show-HeaderInShell "DATA LAKE READINESS - Region"
+    $t, $p = Get-DataLakeRegionCheck
+    Add-Result -Type 'score' -Environment $workspaceName -Section 'Data Lake Region' -Passed $p -Total $t -Percent $(if($t -gt 0){[math]::Round(($p/$t)*100,2)}else{100})
+
+    Show-HeaderInShell "DATA LAKE READINESS - Table Tiers"
+    $t, $p = Get-TableTiersAnalysis
+    Add-Result -Type 'score' -Environment $workspaceName -Section 'Table Tiers' -Passed $p -Total $t -Percent $(if($t -gt 0){[math]::Round(($p/$t)*100,2)}else{100})
 }
 
 $scriptDir = if ($MyInvocation.MyCommand.Path) { Split-Path $MyInvocation.MyCommand.Path } else { Get-Location }

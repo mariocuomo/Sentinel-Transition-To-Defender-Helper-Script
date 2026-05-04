@@ -15,7 +15,7 @@ The tool analyses Defender XDR table retention, analytics rules, and automation 
 Each check is classified as:
 - ✅ **OK** — No action needed
 - ⚠️ **WARNING** — Requires attention before onboarding
-- ℹ️ **INFORMATIONAL** — Awareness only (e.g. disabled rules)
+- ℹ️ **INFORMATIONAL** — No action needed, does not block migration (e.g. tables with default retention, disabled rules). Counts as passed in the final score
 
 ## 📁 Project Structure
 
@@ -57,7 +57,7 @@ Edit `sentinelEnvironments.json` with the Sentinel workspaces to analyse:
 
 ### 3. View the dashboard
 
-Open `dashboard.html` or visit this [website](https://mariocuomo.github.io/view/SentinelInDefender/dashboard.html) in your browser and load the generated `results.csv`.
+Open `dashboard.html` in your browser and load the generated `results.csv`.
 
 ## 🔐 Authentication
 
@@ -85,6 +85,8 @@ In **App mode**, you need to:
 - **Export to PDF** — per workspace or all at once
 - **Direct links** to Azure portal blades for each section
 - **Knowledge base** with recommendations mapped to official Microsoft documentation
+- **Multi-tenant guidance** — access models (GDAP, Lighthouse, B2B), MSSP best practices, and known limitations
+- **Always-on navigation** — Knowledge base and Multi-Tenant tabs are accessible even before loading a CSV
 
 ## 📋 Prerequisites
 
